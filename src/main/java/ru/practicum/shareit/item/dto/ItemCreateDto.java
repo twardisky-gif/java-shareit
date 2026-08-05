@@ -21,6 +21,4 @@ public class ItemCreateDto {
 
     @NotNull(message = "статус доступности обязателен")
     private Boolean available;
-
-    private Long requestId;
 }

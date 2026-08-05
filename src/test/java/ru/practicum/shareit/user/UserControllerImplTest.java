@@ -143,6 +143,45 @@ class UserControllerImplTest {
                 .andExpect(status().isOk());
     }
 
+    @Test
+    void shouldRejectBlankEmailOnUpdate() throws Exception {
+        String email = uniqueEmail();
+        UserDto created = createUser("Имя", email);
+
+        mockMvc.perform(patch("/users/" + created.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"email\":\"\"}"))
+                .andExpect(status().isBadRequest());
+        mockMvc.perform(get("/users/" + created.getId()))
+                .andExpect(jsonPath("$.email").value(email));
+    }
+
+    @Test
+    void shouldRejectBlankNameOnUpdate() throws Exception {
+        UserDto created = createUser("Имя", uniqueEmail());
+
+        mockMvc.perform(patch("/users/" + created.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"   \"}"))
+                .andExpect(status().isBadRequest());
+        mockMvc.perform(get("/users/" + created.getId()))
+                .andExpect(jsonPath("$.name").value("Имя"));
+    }
+
+    @Test
+    void shouldReturnBadRequestForNonNumericUserId() throws Exception {
+        mockMvc.perform(get("/users/abc"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void shouldReturnBadRequestForMalformedJson() throws Exception {
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":"))
+                .andExpect(status().isBadRequest());
+    }
+
     private UserDto createUser(String name, String email) throws Exception {
         String response = mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)

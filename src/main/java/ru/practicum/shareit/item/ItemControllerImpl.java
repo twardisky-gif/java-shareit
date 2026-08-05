@@ -39,7 +39,7 @@ public class ItemControllerImpl implements ItemController {
     @PatchMapping("/{itemId}")
     public ItemDto update(@RequestHeader(USER_ID_HEADER) Long ownerId,
                           @PathVariable Long itemId,
-                          @RequestBody ItemUpdateDto itemUpdateDto) {
+                          @Valid @RequestBody ItemUpdateDto itemUpdateDto) {
         log.info("Обновление вещи {} владельцем {}", itemId, ownerId);
         return itemService.update(ownerId, itemId, itemUpdateDto);
     }

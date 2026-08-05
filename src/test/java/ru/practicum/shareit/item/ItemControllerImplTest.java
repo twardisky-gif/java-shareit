@@ -15,6 +15,7 @@ import ru.practicum.shareit.user.dto.UserDto;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -37,7 +38,7 @@ class ItemControllerImplTest {
     @Test
     void shouldCreateItem() throws Exception {
         UserDto owner = createUser();
-        ItemCreateDto request = new ItemCreateDto("Дрель", "Ударная дрель", true, null);
+        ItemCreateDto request = new ItemCreateDto("Дрель", "Ударная дрель", true);
 
         mockMvc.perform(post("/items")
                         .header(USER_ID_HEADER, owner.getId())
@@ -54,7 +55,7 @@ class ItemControllerImplTest {
     void shouldRejectCreateWithoutOwnerHeader() throws Exception {
         mockMvc.perform(post("/items")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new ItemCreateDto("Дрель", "Описание", true, null))))
+                        .content(objectMapper.writeValueAsString(new ItemCreateDto("Дрель", "Описание", true))))
                 .andExpect(status().isBadRequest());
     }
 
@@ -63,7 +64,7 @@ class ItemControllerImplTest {
         mockMvc.perform(post("/items")
                         .header(USER_ID_HEADER, 9999)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new ItemCreateDto("Дрель", "Описание", true, null))))
+                        .content(objectMapper.writeValueAsString(new ItemCreateDto("Дрель", "Описание", true))))
                 .andExpect(status().isNotFound());
     }
 
@@ -200,6 +201,47 @@ class ItemControllerImplTest {
                 .andExpect(jsonPath("$.length()").value(0));
     }
 
+    @Test
+    void shouldRejectBlankNameOnUpdate() throws Exception {
+        UserDto owner = createUser();
+        ItemDto item = createItem(owner.getId(), "Дрель", "Ударная дрель", true);
+
+        mockMvc.perform(patch("/items/" + item.getId())
+                        .header(USER_ID_HEADER, owner.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"   \"}"))
+                .andExpect(status().isBadRequest());
+        mockMvc.perform(get("/items/" + item.getId()))
+                .andExpect(jsonPath("$.name").value("Дрель"));
+    }
+
+    @Test
+    void shouldReturnBadRequestForNonNumericItemId() throws Exception {
+        mockMvc.perform(get("/items/abc"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void shouldReturnBadRequestWhenSearchTextMissing() throws Exception {
+        mockMvc.perform(get("/items/search"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void shouldRemoveItemsWhenOwnerDeleted() throws Exception {
+        UserDto owner = createUser();
+        String marker = "Сироталампа" + COUNTER.incrementAndGet();
+        ItemDto item = createItem(owner.getId(), marker, "Останется без владельца", true);
+
+        mockMvc.perform(delete("/users/" + owner.getId()))
+                .andExpect(status().isOk());
+        mockMvc.perform(get("/items/" + item.getId()))
+                .andExpect(status().isNotFound());
+        mockMvc.perform(get("/items/search").param("text", marker))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(0));
+    }
+
     private UserDto createUser() throws Exception {
         UserCreateDto request = new UserCreateDto(
                 "Владелец" + COUNTER.incrementAndGet(),
@@ -219,7 +261,7 @@ class ItemControllerImplTest {
                         .header(USER_ID_HEADER, ownerId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
-                                new ItemCreateDto(name, description, available, null))))
+                                new ItemCreateDto(name, description, available))))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()

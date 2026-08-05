@@ -2,11 +2,14 @@ package ru.practicum.shareit.exception;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.stream.Collectors;
 
@@ -45,10 +48,22 @@ public class ErrorHandler {
         return new ErrorResponse("Не передан заголовок " + exception.getHeaderName());
     }
 
+    @ExceptionHandler({MethodArgumentTypeMismatchException.class, HttpMessageNotReadableException.class})
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleMalformedRequest(Exception exception) {
+        log.warn("Некорректный запрос: {}", exception.getMessage());
+        return new ErrorResponse("Некорректный запрос: " + exception.getMessage());
+    }
+
     @ExceptionHandler(Throwable.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponse handleThrowable(Throwable throwable) {
+    public ResponseEntity<ErrorResponse> handleThrowable(Throwable throwable) {
+        if (throwable instanceof org.springframework.web.ErrorResponse springError) {
+            log.warn("Запрос отклонён: {}", throwable.getMessage());
+            return ResponseEntity.status(springError.getStatusCode())
+                    .body(new ErrorResponse(throwable.getMessage()));
+        }
         log.error("Непредвиденная ошибка", throwable);
-        return new ErrorResponse("Непредвиденная ошибка: " + throwable.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ErrorResponse("Непредвиденная ошибка: " + throwable.getMessage()));
     }
 }

@@ -14,4 +14,6 @@ public interface ItemStorage {
     List<Item> findByOwnerId(Long ownerId);
 
     List<Item> findAvailableByText(String text);
+
+    void deleteByOwnerId(Long ownerId);
 }

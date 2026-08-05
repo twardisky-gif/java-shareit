@@ -19,11 +19,11 @@ public class InMemoryItemStorage implements ItemStorage {
 
     @Override
     public Item save(Item item) {
+        List<Item> ownerItems = itemsByOwnerId.computeIfAbsent(item.getOwner().getId(), ownerId -> new ArrayList<>());
         if (item.getId() == null) {
             item.setId(++lastGeneratedId);
-            itemsByOwnerId.computeIfAbsent(item.getOwner().getId(), ownerId -> new ArrayList<>()).add(item);
+            ownerItems.add(item);
         } else {
-            List<Item> ownerItems = itemsByOwnerId.getOrDefault(item.getOwner().getId(), new ArrayList<>());
             ownerItems.replaceAll(stored -> stored.getId().equals(item.getId()) ? item : stored);
         }
         items.put(item.getId(), item);
@@ -47,6 +47,14 @@ public class InMemoryItemStorage implements ItemStorage {
                 .filter(item -> Boolean.TRUE.equals(item.getAvailable()))
                 .filter(item -> matches(item, query))
                 .toList();
+    }
+
+    @Override
+    public void deleteByOwnerId(Long ownerId) {
+        List<Item> removed = itemsByOwnerId.remove(ownerId);
+        if (removed != null) {
+            removed.forEach(item -> items.remove(item.getId()));
+        }
     }
 
     private boolean matches(Item item, String query) {
