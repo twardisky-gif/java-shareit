@@ -11,8 +11,6 @@ import java.util.List;
  */
 public interface ItemController {
 
-    String USER_ID_HEADER = "X-Sharer-User-Id";
-
     /**
      * Добавляет вещь. Её владельцем становится пользователь из заголовка.
      *

@@ -25,6 +25,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ItemControllerImpl implements ItemController {
 
+    private static final String USER_ID_HEADER = "X-Sharer-User-Id";
+
     private final ItemService itemService;
 
     @Override
