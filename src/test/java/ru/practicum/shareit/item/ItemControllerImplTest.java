@@ -211,7 +211,7 @@ class ItemControllerImplTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"   \"}"))
                 .andExpect(status().isBadRequest());
-        mockMvc.perform(get("/items/" + item.getId()))
+        mockMvc.perform(get("/items/" + item.getId()).header(USER_ID_HEADER, owner.getId()))
                 .andExpect(jsonPath("$.name").value("Дрель"));
     }
 
@@ -235,7 +235,7 @@ class ItemControllerImplTest {
 
         mockMvc.perform(delete("/users/" + owner.getId()))
                 .andExpect(status().isOk());
-        mockMvc.perform(get("/items/" + item.getId()))
+        mockMvc.perform(get("/items/" + item.getId()).header(USER_ID_HEADER, owner.getId()))
                 .andExpect(status().isNotFound());
         mockMvc.perform(get("/items/search").param("text", marker))
                 .andExpect(status().isOk())
