@@ -52,6 +52,9 @@ CREATE TABLE IF NOT EXISTS comments (
 );
 
 CREATE INDEX IF NOT EXISTS idx_item_owner ON items (owner_id);
+CREATE INDEX IF NOT EXISTS idx_item_request ON items (request_id);
+CREATE INDEX IF NOT EXISTS idx_request_requestor ON requests (requestor_id);
 CREATE INDEX IF NOT EXISTS idx_booking_item ON bookings (item_id);
 CREATE INDEX IF NOT EXISTS idx_booking_booker ON bookings (booker_id);
 CREATE INDEX IF NOT EXISTS idx_comment_item ON comments (item_id);
+CREATE INDEX IF NOT EXISTS idx_comment_author ON comments (author_id);

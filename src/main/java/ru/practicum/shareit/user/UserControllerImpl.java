@@ -29,7 +29,7 @@ public class UserControllerImpl implements UserController {
     @Override
     @PostMapping
     public UserDto create(@Valid @RequestBody UserCreateDto userCreateDto) {
-        log.info("Создание пользователя {}", userCreateDto.getEmail());
+        log.info("Создание пользователя {}", userCreateDto.getName());
         return userService.create(userCreateDto);
     }
 

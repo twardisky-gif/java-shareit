@@ -242,6 +242,28 @@ class ItemControllerImplTest {
                 .andExpect(jsonPath("$.length()").value(0));
     }
 
+    @Test
+    void shouldRejectTooLongItemName() throws Exception {
+        UserDto owner = createUser();
+
+        mockMvc.perform(post("/items")
+                        .header(USER_ID_HEADER, owner.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                new ItemCreateDto("Д".repeat(300), "Описание", true))))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void shouldNotTreatWildcardAsSearchPattern() throws Exception {
+        UserDto owner = createUser();
+        createItem(owner.getId(), "Стремянка" + COUNTER.incrementAndGet(), "Высокая", true);
+
+        mockMvc.perform(get("/items/search").param("text", "%"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(0));
+    }
+
     private UserDto createUser() throws Exception {
         UserCreateDto request = new UserCreateDto(
                 "Владелец" + COUNTER.incrementAndGet(),

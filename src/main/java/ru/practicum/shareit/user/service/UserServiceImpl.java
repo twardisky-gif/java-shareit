@@ -60,7 +60,7 @@ public class UserServiceImpl implements UserService {
     }
 
     private void requireEmailNotTaken(String email, Long ownerId) {
-        userRepository.findByEmail(email)
+        userRepository.findByEmailIgnoreCase(email)
                 .filter(existing -> !existing.getId().equals(ownerId))
                 .ifPresent(existing -> {
                     throw new ConflictException("Электронная почта " + email + " уже используется");

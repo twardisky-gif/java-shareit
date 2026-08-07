@@ -115,9 +115,15 @@ public class ItemServiceImpl implements ItemService {
         if (text == null || text.isBlank()) {
             return List.of();
         }
-        return itemRepository.searchAvailableByText(text).stream()
+        return itemRepository.searchAvailableByText(escapeLikePattern(text)).stream()
                 .map(ItemMapper::toItemDto)
                 .toList();
+    }
+
+    private String escapeLikePattern(String text) {
+        return text.replace("\\", "\\\\")
+                .replace("%", "\\%")
+                .replace("_", "\\_");
     }
 
     @Override
