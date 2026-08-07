@@ -1,6 +1,7 @@
 package ru.practicum.shareit.exception;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -29,6 +30,13 @@ public class ErrorHandler {
     public ErrorResponse handleConflict(ConflictException exception) {
         log.warn("Конфликт данных: {}", exception.getMessage());
         return new ErrorResponse(exception.getMessage());
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handleDataIntegrity(DataIntegrityViolationException exception) {
+        log.warn("Нарушение целостности данных: {}", exception.getMessage());
+        return new ErrorResponse("Запрос нарушает ограничения базы данных");
     }
 
     @ExceptionHandler(ForbiddenException.class)

@@ -50,3 +50,8 @@ CREATE TABLE IF NOT EXISTS comments (
     CONSTRAINT fk_comment_item FOREIGN KEY (item_id) REFERENCES items (id) ON DELETE CASCADE,
     CONSTRAINT fk_comment_author FOREIGN KEY (author_id) REFERENCES users (id) ON DELETE CASCADE
 );
+
+CREATE INDEX IF NOT EXISTS idx_item_owner ON items (owner_id);
+CREATE INDEX IF NOT EXISTS idx_booking_item ON bookings (item_id);
+CREATE INDEX IF NOT EXISTS idx_booking_booker ON bookings (booker_id);
+CREATE INDEX IF NOT EXISTS idx_comment_item ON comments (item_id);
