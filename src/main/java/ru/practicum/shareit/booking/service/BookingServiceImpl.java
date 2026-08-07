@@ -44,6 +44,7 @@ public class BookingServiceImpl implements BookingService {
         if (item.getOwner().getId().equals(bookerId)) {
             throw new NotFoundException("Владелец не может забронировать собственную вещь");
         }
+        requirePeriodFree(item.getId(), bookingCreateDto.getStart(), bookingCreateDto.getEnd());
         Booking saved = bookingRepository.save(BookingMapper.toBooking(bookingCreateDto, item, booker));
         return BookingMapper.toBookingDto(saved);
     }
@@ -57,6 +58,9 @@ public class BookingServiceImpl implements BookingService {
         }
         if (booking.getStatus() != BookingStatus.WAITING) {
             throw new ValidationException("Бронирование " + bookingId + " уже обработано");
+        }
+        if (approved) {
+            requirePeriodFree(booking.getItem().getId(), booking.getStart(), booking.getEnd());
         }
         booking.setStatus(approved ? BookingStatus.APPROVED : BookingStatus.REJECTED);
         return BookingMapper.toBookingDto(bookingRepository.save(booking));
@@ -107,6 +111,13 @@ public class BookingServiceImpl implements BookingService {
             case ALL -> bookingRepository.findByItemOwnerIdOrderByStartDesc(ownerId);
         };
         return toDtoList(bookings);
+    }
+
+    private void requirePeriodFree(Long itemId, LocalDateTime start, LocalDateTime end) {
+        if (bookingRepository.existsByItemIdAndStatusAndStartLessThanAndEndGreaterThan(
+                itemId, BookingStatus.APPROVED, end, start)) {
+            throw new ValidationException("Вещь с id " + itemId + " уже забронирована на эти даты");
+        }
     }
 
     private List<BookingDto> toDtoList(List<Booking> bookings) {

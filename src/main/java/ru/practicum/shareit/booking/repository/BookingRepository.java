@@ -9,6 +9,7 @@ import ru.practicum.shareit.exception.NotFoundException;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 public interface BookingRepository extends JpaRepository<Booking, Long> {
 
@@ -55,8 +56,16 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
                                                            BookingStatus status,
                                                            LocalDateTime end);
 
+    boolean existsByItemIdAndStatusAndStartLessThanAndEndGreaterThan(Long itemId,
+                                                                     BookingStatus status,
+                                                                     LocalDateTime end,
+                                                                     LocalDateTime start);
+
+    @EntityGraph(attributePaths = {"item", "item.owner", "booker"})
+    Optional<Booking> findDetailedById(Long bookingId);
+
     default Booking requireById(Long bookingId) {
-        return findById(bookingId)
+        return findDetailedById(bookingId)
                 .orElseThrow(() -> new NotFoundException("Бронирование с id " + bookingId + " не найдено"));
     }
 }
