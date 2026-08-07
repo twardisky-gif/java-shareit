@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.ConflictException;
-import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.dto.UserCreateDto;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.dto.UserUpdateDto;
@@ -32,7 +31,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserDto update(Long userId, UserUpdateDto userUpdateDto) {
-        User stored = requireUser(userId);
+        User stored = userRepository.requireById(userId);
         String email = userUpdateDto.getEmail() == null ? stored.getEmail() : userUpdateDto.getEmail();
         String name = userUpdateDto.getName() == null ? stored.getName() : userUpdateDto.getName();
         requireEmailNotTaken(email, userId);
@@ -43,7 +42,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto getById(Long userId) {
-        return UserMapper.toUserDto(requireUser(userId));
+        return UserMapper.toUserDto(userRepository.requireById(userId));
     }
 
     @Override
@@ -56,13 +55,8 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void deleteById(Long userId) {
-        requireUser(userId);
+        userRepository.requireById(userId);
         userRepository.deleteById(userId);
-    }
-
-    private User requireUser(Long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("Пользователь с id " + userId + " не найден"));
     }
 
     private void requireEmailNotTaken(String email, Long ownerId) {

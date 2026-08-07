@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
+import ru.practicum.shareit.exception.NotFoundException;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -53,4 +54,9 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
                                                            Long itemId,
                                                            BookingStatus status,
                                                            LocalDateTime end);
+
+    default Booking requireById(Long bookingId) {
+        return findById(bookingId)
+                .orElseThrow(() -> new NotFoundException("Бронирование с id " + bookingId + " не найдено"));
+    }
 }

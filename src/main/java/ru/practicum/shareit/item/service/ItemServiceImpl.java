@@ -44,7 +44,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional
     public ItemDto create(Long ownerId, ItemCreateDto itemCreateDto) {
-        User owner = requireUser(ownerId);
+        User owner = userRepository.requireById(ownerId);
         Item saved = itemRepository.save(ItemMapper.toItem(itemCreateDto, owner));
         return ItemMapper.toItemDto(saved);
     }
@@ -52,8 +52,8 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional
     public ItemDto update(Long ownerId, Long itemId, ItemUpdateDto itemUpdateDto) {
-        requireUser(ownerId);
-        Item stored = requireItem(itemId);
+        userRepository.requireById(ownerId);
+        Item stored = itemRepository.requireById(itemId);
         if (!stored.getOwner().getId().equals(ownerId)) {
             throw new NotFoundException("Вещь с id " + itemId + " не принадлежит пользователю " + ownerId);
         }
@@ -71,7 +71,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemBookingsDto getById(Long userId, Long itemId) {
-        Item item = requireItem(itemId);
+        Item item = itemRepository.requireById(itemId);
         List<CommentDto> comments = commentRepository.findByItemIdOrderByCreatedDesc(itemId).stream()
                 .map(CommentMapper::toCommentDto)
                 .toList();
@@ -85,7 +85,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemBookingsDto> getByOwnerId(Long ownerId) {
-        requireUser(ownerId);
+        userRepository.requireById(ownerId);
         List<Item> items = itemRepository.findByOwnerIdOrderById(ownerId);
         if (items.isEmpty()) {
             return List.of();
@@ -123,8 +123,8 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional
     public CommentDto addComment(Long userId, Long itemId, CommentCreateDto commentCreateDto) {
-        User author = requireUser(userId);
-        Item item = requireItem(itemId);
+        User author = userRepository.requireById(userId);
+        Item item = itemRepository.requireById(itemId);
         LocalDateTime now = LocalDateTime.now();
         if (!bookingRepository.existsByBookerIdAndItemIdAndStatusAndEndBefore(
                 userId, itemId, BookingStatus.APPROVED, now)) {
@@ -148,15 +148,5 @@ public class ItemServiceImpl implements ItemService {
                 .min(Comparator.comparing(Booking::getStart))
                 .map(BookingMapper::toBookingShortDto)
                 .orElse(null);
-    }
-
-    private User requireUser(Long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("Пользователь с id " + userId + " не найден"));
-    }
-
-    private Item requireItem(Long itemId) {
-        return itemRepository.findById(itemId)
-                .orElseThrow(() -> new NotFoundException("Вещь с id " + itemId + " не найдена"));
     }
 }

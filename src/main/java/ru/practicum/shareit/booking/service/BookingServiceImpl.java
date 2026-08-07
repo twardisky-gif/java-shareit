@@ -33,9 +33,8 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public BookingDto create(Long bookerId, BookingCreateDto bookingCreateDto) {
-        User booker = requireUser(bookerId);
-        Item item = itemRepository.findById(bookingCreateDto.getItemId())
-                .orElseThrow(() -> new NotFoundException("Вещь с id " + bookingCreateDto.getItemId() + " не найдена"));
+        User booker = userRepository.requireById(bookerId);
+        Item item = itemRepository.requireById(bookingCreateDto.getItemId());
         if (!bookingCreateDto.getEnd().isAfter(bookingCreateDto.getStart())) {
             throw new ValidationException("Дата окончания бронирования должна быть позже даты начала");
         }
@@ -52,7 +51,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public BookingDto approve(Long ownerId, Long bookingId, boolean approved) {
-        Booking booking = requireBooking(bookingId);
+        Booking booking = bookingRepository.requireById(bookingId);
         if (!booking.getItem().getOwner().getId().equals(ownerId)) {
             throw new ForbiddenException("Пользователь " + ownerId + " не является владельцем вещи");
         }
@@ -65,7 +64,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingDto getById(Long userId, Long bookingId) {
-        Booking booking = requireBooking(bookingId);
+        Booking booking = bookingRepository.requireById(bookingId);
         boolean isBooker = booking.getBooker().getId().equals(userId);
         boolean isOwner = booking.getItem().getOwner().getId().equals(userId);
         if (!isBooker && !isOwner) {
@@ -76,7 +75,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<BookingDto> getByBooker(Long bookerId, BookingState state) {
-        requireUser(bookerId);
+        userRepository.requireById(bookerId);
         LocalDateTime now = LocalDateTime.now();
         List<Booking> bookings = switch (state) {
             case CURRENT -> bookingRepository
@@ -94,7 +93,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<BookingDto> getByOwner(Long ownerId, BookingState state) {
-        requireUser(ownerId);
+        userRepository.requireById(ownerId);
         LocalDateTime now = LocalDateTime.now();
         List<Booking> bookings = switch (state) {
             case CURRENT -> bookingRepository
@@ -114,15 +113,5 @@ public class BookingServiceImpl implements BookingService {
         return bookings.stream()
                 .map(BookingMapper::toBookingDto)
                 .toList();
-    }
-
-    private User requireUser(Long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("Пользователь с id " + userId + " не найден"));
-    }
-
-    private Booking requireBooking(Long bookingId) {
-        return bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new NotFoundException("Бронирование с id " + bookingId + " не найдено"));
     }
 }
