@@ -70,22 +70,29 @@ public class ErrorHandler {
         return new ErrorResponse("Не передан заголовок " + exception.getHeaderName());
     }
 
-    @ExceptionHandler({MethodArgumentTypeMismatchException.class, HttpMessageNotReadableException.class})
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleMalformedRequest(Exception exception) {
-        log.warn("Некорректный запрос: {}", exception.getMessage());
-        return new ErrorResponse("Некорректный запрос: " + exception.getMessage());
+    public ErrorResponse handleTypeMismatch(MethodArgumentTypeMismatchException exception) {
+        log.warn("Некорректное значение параметра {}: {}", exception.getName(), exception.getValue());
+        return new ErrorResponse("Некорректное значение параметра " + exception.getName());
     }
 
-    @ExceptionHandler(Throwable.class)
-    public ResponseEntity<ErrorResponse> handleThrowable(Throwable throwable) {
-        if (throwable instanceof org.springframework.web.ErrorResponse springError) {
-            log.warn("Запрос отклонён: {}", throwable.getMessage());
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleUnreadableBody(HttpMessageNotReadableException exception) {
+        log.warn("Некорректное тело запроса: {}", exception.getMessage());
+        return new ErrorResponse("Некорректный формат тела запроса");
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleUnexpected(Exception exception) {
+        if (exception instanceof org.springframework.web.ErrorResponse springError) {
+            log.warn("Запрос отклонён: {}", exception.getMessage());
             return ResponseEntity.status(springError.getStatusCode())
-                    .body(new ErrorResponse(throwable.getMessage()));
+                    .body(new ErrorResponse("Запрос не может быть обработан"));
         }
-        log.error("Непредвиденная ошибка", throwable);
+        log.error("Непредвиденная ошибка", exception);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ErrorResponse("Непредвиденная ошибка: " + throwable.getMessage()));
+                .body(new ErrorResponse("Непредвиденная ошибка"));
     }
 }
