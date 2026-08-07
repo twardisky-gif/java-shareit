@@ -10,10 +10,15 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import ru.practicum.shareit.booking.dto.BookingCreateDto;
 import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.BookingStatus;
+import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.item.dto.ItemCreateDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.dto.UserCreateDto;
 import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
@@ -38,6 +43,15 @@ class BookingControllerImplTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private BookingRepository bookingRepository;
+
+    @Autowired
+    private ItemRepository itemRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Test
     void shouldCreateBookingInWaitingStatus() throws Exception {
@@ -315,6 +329,99 @@ class BookingControllerImplTest {
     }
 
     @Test
+    void shouldRejectOverlappingBooking() throws Exception {
+        UserDto owner = createUser();
+        UserDto firstBooker = createUser();
+        UserDto secondBooker = createUser();
+        ItemDto item = createItem(owner.getId(), true);
+        BookingDto booking = createBooking(firstBooker.getId(), item.getId());
+        mockMvc.perform(patch("/bookings/" + booking.getId())
+                        .header(USER_ID_HEADER, owner.getId())
+                        .param("approved", "true"))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(bookingRequest(secondBooker.getId(), item.getId()))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void shouldAllowBookingAfterApprovedPeriodEnds() throws Exception {
+        UserDto owner = createUser();
+        UserDto firstBooker = createUser();
+        UserDto secondBooker = createUser();
+        ItemDto item = createItem(owner.getId(), true);
+        BookingDto booking = createBooking(firstBooker.getId(), item.getId());
+        mockMvc.perform(patch("/bookings/" + booking.getId())
+                        .header(USER_ID_HEADER, owner.getId())
+                        .param("approved", "true"))
+                .andExpect(status().isOk());
+        LocalDateTime start = LocalDateTime.now().plusDays(10).truncatedTo(ChronoUnit.SECONDS);
+
+        mockMvc.perform(post("/bookings")
+                        .header(USER_ID_HEADER, secondBooker.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                new BookingCreateDto(item.getId(), start, start.plusDays(1)))))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void shouldAcceptIsoDatesWithMilliseconds() throws Exception {
+        UserDto owner = createUser();
+        UserDto booker = createUser();
+        ItemDto item = createItem(owner.getId(), true);
+        LocalDateTime start = LocalDateTime.now().plusDays(1).truncatedTo(ChronoUnit.SECONDS);
+
+        mockMvc.perform(post("/bookings")
+                        .header(USER_ID_HEADER, booker.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"itemId\":" + item.getId()
+                                + ",\"start\":\"" + start + ".000\""
+                                + ",\"end\":\"" + start.plusDays(1) + ".000\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.start").value(start.toString()));
+    }
+
+    @Test
+    void shouldReturnCurrentBookingsForBookerAndOwner() throws Exception {
+        UserDto owner = createUser();
+        UserDto booker = createUser();
+        ItemDto item = createItem(owner.getId(), true);
+        LocalDateTime now = LocalDateTime.now();
+        saveBooking(item.getId(), booker.getId(), now.minusDays(1), now.plusDays(1));
+
+        mockMvc.perform(get("/bookings").header(USER_ID_HEADER, booker.getId()).param("state", "CURRENT"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1));
+        mockMvc.perform(get("/bookings/owner").header(USER_ID_HEADER, owner.getId()).param("state", "CURRENT"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1));
+    }
+
+    @Test
+    void shouldReturnOwnerBookingsByState() throws Exception {
+        UserDto owner = createUser();
+        UserDto booker = createUser();
+        ItemDto item = createItem(owner.getId(), true);
+        LocalDateTime now = LocalDateTime.now();
+        saveBooking(item.getId(), booker.getId(), now.minusDays(5), now.minusDays(4));
+        createBooking(booker.getId(), item.getId());
+
+        mockMvc.perform(get("/bookings/owner").header(USER_ID_HEADER, owner.getId()).param("state", "PAST"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1));
+        mockMvc.perform(get("/bookings/owner").header(USER_ID_HEADER, owner.getId()).param("state", "FUTURE"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1));
+        mockMvc.perform(get("/bookings/owner").header(USER_ID_HEADER, owner.getId()).param("state", "WAITING"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1));
+        mockMvc.perform(get("/bookings/owner").header(USER_ID_HEADER, owner.getId()).param("state", "REJECTED"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(0));
+    }
+
+    @Test
     void shouldRejectUnknownState() throws Exception {
         UserDto booker = createUser();
 
@@ -334,6 +441,16 @@ class BookingControllerImplTest {
     void shouldRejectBookingWithoutUserHeader() throws Exception {
         mockMvc.perform(get("/bookings"))
                 .andExpect(status().isBadRequest());
+    }
+
+    private void saveBooking(Long itemId, Long bookerId, LocalDateTime start, LocalDateTime end) {
+        bookingRepository.save(Booking.builder()
+                .item(itemRepository.findById(itemId).orElseThrow())
+                .booker(userRepository.findById(bookerId).orElseThrow())
+                .start(start)
+                .end(end)
+                .status(BookingStatus.APPROVED)
+                .build());
     }
 
     private MockHttpServletRequestBuilder bookingRequest(Long userId, Long itemId) throws Exception {
