@@ -7,6 +7,9 @@ import ru.practicum.shareit.item.model.Comment;
 import java.util.Collection;
 import java.util.List;
 
+/**
+ * Репозиторий для чтения и сохранения комментариев к вещам.
+ */
 public interface CommentRepository extends JpaRepository<Comment, Long> {
 
     @EntityGraph(attributePaths = "author")

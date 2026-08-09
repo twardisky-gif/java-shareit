@@ -8,6 +8,9 @@ import ru.practicum.shareit.item.model.Item;
 
 import java.util.List;
 
+/**
+ * Репозиторий для чтения и изменения вещей.
+ */
 public interface ItemRepository extends JpaRepository<Item, Long> {
 
     List<Item> findByOwnerIdOrderById(Long ownerId);
@@ -18,6 +21,13 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
             + "or upper(i.description) like upper(concat('%', :text, '%')) escape '\\')")
     List<Item> searchAvailableByText(@Param("text") String text);
 
+    /**
+     * Возвращает вещь по идентификатору или выбрасывает исключение.
+     *
+     * @param itemId идентификатор вещи
+     * @return найденная вещь
+     * @throws NotFoundException если вещь не найдена
+     */
     default Item requireById(Long itemId) {
         return findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Вещь с id " + itemId + " не найдена"));

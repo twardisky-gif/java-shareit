@@ -11,6 +11,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Репозиторий для чтения и изменения бронирований.
+ */
 public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     @EntityGraph(attributePaths = {"item", "booker"})
@@ -64,6 +67,13 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     @EntityGraph(attributePaths = {"item", "item.owner", "booker"})
     Optional<Booking> findDetailedById(Long bookingId);
 
+    /**
+     * Возвращает бронирование вместе с вещью, владельцем и автором брони.
+     *
+     * @param bookingId идентификатор бронирования
+     * @return найденное бронирование
+     * @throws NotFoundException если бронирование не найдено
+     */
     default Booking requireById(Long bookingId) {
         return findDetailedById(bookingId)
                 .orElseThrow(() -> new NotFoundException("Бронирование с id " + bookingId + " не найдено"));

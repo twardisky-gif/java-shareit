@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.practicum.shareit.common.DateTimePatterns;
 
 import java.time.LocalDateTime;
 
@@ -17,9 +18,9 @@ public class BookingShortDto {
     private Long id;
     private Long bookerId;
 
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @JsonFormat(pattern = DateTimePatterns.ISO_LOCAL_DATE_TIME_SECONDS)
     private LocalDateTime start;
 
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @JsonFormat(pattern = DateTimePatterns.ISO_LOCAL_DATE_TIME_SECONDS)
     private LocalDateTime end;
 }
