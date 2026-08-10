@@ -12,6 +12,10 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import ru.practicum.shareit.common.RequestHeaders;
+import ru.practicum.shareit.item.dto.CommentCreateDto;
+import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.ItemBookingsDto;
 import ru.practicum.shareit.item.dto.ItemCreateDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemUpdateDto;
@@ -25,13 +29,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ItemControllerImpl implements ItemController {
 
-    private static final String USER_ID_HEADER = "X-Sharer-User-Id";
-
     private final ItemService itemService;
 
     @Override
     @PostMapping
-    public ItemDto create(@RequestHeader(USER_ID_HEADER) Long ownerId,
+    public ItemDto create(@RequestHeader(RequestHeaders.USER_ID) Long ownerId,
                           @Valid @RequestBody ItemCreateDto itemCreateDto) {
         log.info("Добавление вещи {} владельцем {}", itemCreateDto.getName(), ownerId);
         return itemService.create(ownerId, itemCreateDto);
@@ -39,7 +41,7 @@ public class ItemControllerImpl implements ItemController {
 
     @Override
     @PatchMapping("/{itemId}")
-    public ItemDto update(@RequestHeader(USER_ID_HEADER) Long ownerId,
+    public ItemDto update(@RequestHeader(RequestHeaders.USER_ID) Long ownerId,
                           @PathVariable Long itemId,
                           @Valid @RequestBody ItemUpdateDto itemUpdateDto) {
         log.info("Обновление вещи {} владельцем {}", itemId, ownerId);
@@ -48,13 +50,14 @@ public class ItemControllerImpl implements ItemController {
 
     @Override
     @GetMapping("/{itemId}")
-    public ItemDto getById(@PathVariable Long itemId) {
-        return itemService.getById(itemId);
+    public ItemBookingsDto getById(@RequestHeader(RequestHeaders.USER_ID) Long userId,
+                                   @PathVariable Long itemId) {
+        return itemService.getById(userId, itemId);
     }
 
     @Override
     @GetMapping
-    public List<ItemDto> getByOwnerId(@RequestHeader(USER_ID_HEADER) Long ownerId) {
+    public List<ItemBookingsDto> getByOwnerId(@RequestHeader(RequestHeaders.USER_ID) Long ownerId) {
         return itemService.getByOwnerId(ownerId);
     }
 
@@ -62,5 +65,14 @@ public class ItemControllerImpl implements ItemController {
     @GetMapping("/search")
     public List<ItemDto> search(@RequestParam String text) {
         return itemService.search(text);
+    }
+
+    @Override
+    @PostMapping("/{itemId}/comment")
+    public CommentDto addComment(@RequestHeader(RequestHeaders.USER_ID) Long userId,
+                                 @PathVariable Long itemId,
+                                 @Valid @RequestBody CommentCreateDto commentCreateDto) {
+        log.info("Добавление отзыва о вещи {} пользователем {}", itemId, userId);
+        return itemService.addComment(userId, itemId, commentCreateDto);
     }
 }

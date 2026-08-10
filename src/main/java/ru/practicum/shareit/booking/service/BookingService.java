@@ -1,4 +1,4 @@
-package ru.practicum.shareit.booking;
+package ru.practicum.shareit.booking.service;
 
 import ru.practicum.shareit.booking.dto.BookingCreateDto;
 import ru.practicum.shareit.booking.dto.BookingDto;
@@ -7,14 +7,14 @@ import ru.practicum.shareit.booking.dto.BookingState;
 import java.util.List;
 
 /**
- * REST-контракт для работы с бронированиями вещей.
+ * Операции над бронированиями вещей.
  */
-public interface BookingController {
+public interface BookingService {
 
     /**
-     * Создаёт запрос на бронирование вещи.
+     * Создаёт запрос на бронирование доступной вещи в статусе ожидания подтверждения.
      *
-     * @param bookerId идентификатор пользователя из заголовка X-Sharer-User-Id
+     * @param bookerId идентификатор пользователя, который бронирует вещь
      * @param bookingCreateDto вещь и даты бронирования
      * @return созданное бронирование в статусе WAITING
      */
@@ -23,36 +23,36 @@ public interface BookingController {
     /**
      * Подтверждает или отклоняет бронирование. Доступно только владельцу вещи.
      *
-     * @param ownerId идентификатор владельца вещи из заголовка X-Sharer-User-Id
+     * @param ownerId идентификатор владельца вещи
      * @param bookingId идентификатор бронирования
      * @param approved true — подтвердить, false — отклонить
-     * @return бронирование с новым статусом
+     * @return бронирование в статусе APPROVED или REJECTED
      */
     BookingDto approve(Long ownerId, Long bookingId, boolean approved);
 
     /**
      * Возвращает бронирование. Доступно автору бронирования и владельцу вещи.
      *
-     * @param userId идентификатор пользователя из заголовка X-Sharer-User-Id
+     * @param userId идентификатор запрашивающего пользователя
      * @param bookingId идентификатор бронирования
      * @return найденное бронирование
      */
     BookingDto getById(Long userId, Long bookingId);
 
     /**
-     * Возвращает бронирования текущего пользователя от новых к старым.
+     * Возвращает бронирования пользователя, отсортированные от новых к старым.
      *
-     * @param bookerId идентификатор пользователя из заголовка X-Sharer-User-Id
-     * @param state фильтр по состоянию бронирования, по умолчанию ALL
+     * @param bookerId идентификатор пользователя
+     * @param state фильтр по состоянию бронирования
      * @return список бронирований пользователя
      */
     List<BookingDto> getByBooker(Long bookerId, BookingState state);
 
     /**
-     * Возвращает бронирования всех вещей текущего пользователя от новых к старым.
+     * Возвращает бронирования всех вещей владельца, отсортированные от новых к старым.
      *
-     * @param ownerId идентификатор владельца вещей из заголовка X-Sharer-User-Id
-     * @param state фильтр по состоянию бронирования, по умолчанию ALL
+     * @param ownerId идентификатор владельца вещей
+     * @param state фильтр по состоянию бронирования
      * @return список бронирований вещей владельца
      */
     List<BookingDto> getByOwner(Long ownerId, BookingState state);

@@ -211,7 +211,7 @@ class ItemControllerImplTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"   \"}"))
                 .andExpect(status().isBadRequest());
-        mockMvc.perform(get("/items/" + item.getId()))
+        mockMvc.perform(get("/items/" + item.getId()).header(USER_ID_HEADER, owner.getId()))
                 .andExpect(jsonPath("$.name").value("Дрель"));
     }
 
@@ -235,9 +235,31 @@ class ItemControllerImplTest {
 
         mockMvc.perform(delete("/users/" + owner.getId()))
                 .andExpect(status().isOk());
-        mockMvc.perform(get("/items/" + item.getId()))
+        mockMvc.perform(get("/items/" + item.getId()).header(USER_ID_HEADER, owner.getId()))
                 .andExpect(status().isNotFound());
         mockMvc.perform(get("/items/search").param("text", marker))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(0));
+    }
+
+    @Test
+    void shouldRejectTooLongItemName() throws Exception {
+        UserDto owner = createUser();
+
+        mockMvc.perform(post("/items")
+                        .header(USER_ID_HEADER, owner.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                new ItemCreateDto("Д".repeat(300), "Описание", true))))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void shouldNotTreatWildcardAsSearchPattern() throws Exception {
+        UserDto owner = createUser();
+        createItem(owner.getId(), "Стремянка" + COUNTER.incrementAndGet(), "Высокая", true);
+
+        mockMvc.perform(get("/items/search").param("text", "%"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(0));
     }

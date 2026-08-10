@@ -182,6 +182,27 @@ class UserControllerImplTest {
                 .andExpect(status().isBadRequest());
     }
 
+    @Test
+    void shouldRejectDuplicateEmailInDifferentCase() throws Exception {
+        String email = uniqueEmail();
+        createUser("Первый", email);
+
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                new UserCreateDto("Второй", email.toUpperCase()))))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
+    void shouldRejectTooLongName() throws Exception {
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                new UserCreateDto("и".repeat(300), uniqueEmail()))))
+                .andExpect(status().isBadRequest());
+    }
+
     private UserDto createUser(String name, String email) throws Exception {
         String response = mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
