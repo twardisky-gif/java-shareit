@@ -12,6 +12,9 @@ import org.springframework.web.client.RestTemplate;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Базовый REST-клиент для взаимодействия gateway с основным сервисом.
+ */
 public class BaseClient {
 
     protected final RestTemplate rest;

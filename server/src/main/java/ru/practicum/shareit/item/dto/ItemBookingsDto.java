@@ -8,6 +8,9 @@ import ru.practicum.shareit.booking.dto.BookingShortDto;
 
 import java.util.List;
 
+/**
+ * Представление вещи с бронированиями и комментариями.
+ */
 @Data
 @Builder
 @NoArgsConstructor

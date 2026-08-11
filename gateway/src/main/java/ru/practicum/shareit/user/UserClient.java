@@ -7,6 +7,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import ru.practicum.shareit.client.BaseClient;
 
+/**
+ * REST-клиент основного сервиса для операций с пользователями.
+ */
 @Service
 public class UserClient extends BaseClient {
 

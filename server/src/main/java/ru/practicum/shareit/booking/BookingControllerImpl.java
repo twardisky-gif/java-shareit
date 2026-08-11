@@ -20,6 +20,9 @@ import ru.practicum.shareit.common.RequestHeaders;
 
 import java.util.List;
 
+/**
+ * REST-контроллер основного сервиса для работы с бронированиями.
+ */
 @Slf4j
 @RestController
 @RequestMapping("/bookings")

@@ -21,6 +21,9 @@ import ru.practicum.shareit.user.repository.UserRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Реализация бизнес-логики для работы с бронированиями.
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)

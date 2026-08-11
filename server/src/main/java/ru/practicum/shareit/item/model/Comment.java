@@ -19,6 +19,9 @@ import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
 
+/**
+ * Сущность комментария к вещи.
+ */
 @Entity
 @Table(name = "comments")
 @Getter

@@ -8,6 +8,9 @@ import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
 
+/**
+ * Преобразование моделей и DTO для вещей.
+ */
 public final class CommentMapper {
 
     private CommentMapper() {

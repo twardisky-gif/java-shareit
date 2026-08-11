@@ -19,6 +19,9 @@ import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
 
+/**
+ * Сущность запроса на добавление вещи.
+ */
 @Entity
 @Table(name = "requests")
 @Getter

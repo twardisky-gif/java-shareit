@@ -4,6 +4,9 @@ import ru.practicum.shareit.user.dto.UserCreateDto;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 
+/**
+ * Преобразование моделей и DTO для пользователей.
+ */
 public final class UserMapper {
 
     private UserMapper() {

@@ -8,6 +8,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.practicum.shareit.validation.NullOrNotBlank;
 
+/**
+ * Данные для обновления пользователя.
+ */
 @Data
 @Builder
 @NoArgsConstructor

@@ -11,6 +11,9 @@ import ru.practicum.shareit.user.model.User;
 
 import java.util.List;
 
+/**
+ * Преобразование моделей и DTO для вещей.
+ */
 public final class ItemMapper {
 
     private ItemMapper() {

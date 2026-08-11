@@ -18,6 +18,9 @@ import ru.practicum.shareit.item.dto.CommentCreateDto;
 import ru.practicum.shareit.item.dto.ItemCreateDto;
 import ru.practicum.shareit.item.dto.ItemUpdateDto;
 
+/**
+ * REST-контроллер gateway для работы с вещами.
+ */
 @RestController
 @RequestMapping("/items")
 @RequiredArgsConstructor

@@ -14,6 +14,9 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.shareit.common.RequestHeaders;
 import ru.practicum.shareit.request.dto.ItemRequestCreateDto;
 
+/**
+ * REST-контроллер gateway для работы с запросами вещей.
+ */
 @RestController
 @RequestMapping("/requests")
 @RequiredArgsConstructor

@@ -5,6 +5,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Краткое представление вещи, добавленной в ответ на запрос.
+ */
 @Data
 @Builder
 @NoArgsConstructor

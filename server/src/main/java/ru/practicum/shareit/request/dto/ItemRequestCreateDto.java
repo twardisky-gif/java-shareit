@@ -7,6 +7,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Данные для создания запроса вещи.
+ */
 @Data
 @Builder
 @NoArgsConstructor

@@ -3,6 +3,9 @@ package ru.practicum.shareit.booking.dto;
 import java.util.Arrays;
 import java.util.Optional;
 
+/**
+ * Фильтр состояния бронирований.
+ */
 public enum BookingState {
 
     ALL,

@@ -1,5 +1,8 @@
 package ru.practicum.shareit.booking.dto;
 
+/**
+ * Фильтр состояния бронирований.
+ */
 public enum BookingState {
 
     ALL,

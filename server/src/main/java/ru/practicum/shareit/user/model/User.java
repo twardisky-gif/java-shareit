@@ -13,6 +13,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * Сущность пользователя ShareIt.
+ */
 @Entity
 @Table(name = "users")
 @Getter

@@ -22,6 +22,9 @@ import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
 
+/**
+ * Сущность бронирования вещи.
+ */
 @Entity
 @Table(name = "bookings")
 @Getter

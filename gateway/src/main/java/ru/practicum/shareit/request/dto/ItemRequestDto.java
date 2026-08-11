@@ -8,6 +8,9 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Данные запроса вещи.
+ */
 @Data
 @Builder
 @NoArgsConstructor

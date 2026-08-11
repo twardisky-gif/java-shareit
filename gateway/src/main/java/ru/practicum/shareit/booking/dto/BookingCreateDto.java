@@ -10,6 +10,9 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+/**
+ * Данные для создания бронирования.
+ */
 @Data
 @Builder
 @NoArgsConstructor

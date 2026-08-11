@@ -15,6 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.shareit.user.dto.UserCreateDto;
 import ru.practicum.shareit.user.dto.UserUpdateDto;
 
+/**
+ * REST-контроллер gateway для работы с пользователями.
+ */
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor

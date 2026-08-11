@@ -10,6 +10,9 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
 
+/**
+ * Преобразование моделей и DTO для бронирований.
+ */
 public final class BookingMapper {
 
     private BookingMapper() {

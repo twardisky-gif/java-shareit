@@ -14,6 +14,9 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 
 import java.util.stream.Collectors;
 
+/**
+ * Обработчик ошибок REST API.
+ */
 @Slf4j
 @RestControllerAdvice
 public class ErrorHandler {

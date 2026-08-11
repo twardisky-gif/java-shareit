@@ -18,6 +18,9 @@ import ru.practicum.shareit.user.service.UserService;
 
 import java.util.List;
 
+/**
+ * REST-контроллер основного сервиса для работы с пользователями.
+ */
 @Slf4j
 @RestController
 @RequestMapping(path = "/users")

@@ -10,6 +10,9 @@ import ru.practicum.shareit.user.model.User;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Преобразование моделей и DTO для запросов вещей.
+ */
 public final class ItemRequestMapper {
 
     private ItemRequestMapper() {

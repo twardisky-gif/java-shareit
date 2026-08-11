@@ -13,6 +13,9 @@ import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.List;
 
+/**
+ * Реализация бизнес-логики для работы с пользователями.
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)

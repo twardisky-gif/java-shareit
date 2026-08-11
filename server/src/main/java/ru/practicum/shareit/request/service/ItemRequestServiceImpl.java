@@ -18,6 +18,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Реализация бизнес-логики для работы с запросами вещей.
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)

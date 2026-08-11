@@ -11,6 +11,9 @@ import ru.practicum.shareit.client.BaseClient;
 
 import java.util.Map;
 
+/**
+ * REST-клиент основного сервиса для операций с бронированиями.
+ */
 @Service
 public class BookingClient extends BaseClient {
 

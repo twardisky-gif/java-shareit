@@ -10,6 +10,9 @@ import ru.practicum.shareit.client.BaseClient;
 
 import java.util.Map;
 
+/**
+ * REST-клиент основного сервиса для операций с вещами.
+ */
 @Service
 public class ItemClient extends BaseClient {
 

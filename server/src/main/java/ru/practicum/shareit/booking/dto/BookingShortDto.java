@@ -9,6 +9,9 @@ import ru.practicum.shareit.common.DateTimePatterns;
 
 import java.time.LocalDateTime;
 
+/**
+ * Краткие данные бронирования.
+ */
 @Data
 @Builder
 @NoArgsConstructor

@@ -17,6 +17,9 @@ import ru.practicum.shareit.booking.dto.BookingCreateDto;
 import ru.practicum.shareit.booking.dto.BookingState;
 import ru.practicum.shareit.common.RequestHeaders;
 
+/**
+ * REST-контроллер gateway для работы с бронированиями.
+ */
 @RestController
 @RequestMapping("/bookings")
 @RequiredArgsConstructor

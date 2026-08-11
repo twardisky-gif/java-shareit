@@ -23,6 +23,9 @@ import ru.practicum.shareit.item.service.ItemService;
 
 import java.util.List;
 
+/**
+ * REST-контроллер основного сервиса для работы с вещами.
+ */
 @Slf4j
 @RestController
 @RequestMapping("/items")
